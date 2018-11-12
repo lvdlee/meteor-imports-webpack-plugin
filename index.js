@@ -17,7 +17,7 @@ MeteorImportsPlugin.prototype.apply = function(compiler) {
   var self = this;
 
   function getMeteorBuild(context) {
-    var webBrowser = self.config.legacy ? 'web.browser' : 'web.browser.legacy'
+    var webBrowser = self.config.legacy ? 'web.browser.legacy' : 'web.browser'
     return self.config.meteorProgramsFolder
       ? path.resolve(context, self.config.meteorProgramsFolder, webBrowser)
       : path.resolve(context, self.config.meteorFolder, '.meteor', 'local', 'build', 'programs', webBrowser);
