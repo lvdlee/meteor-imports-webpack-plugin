@@ -80,6 +80,11 @@ If `injectMeteorRuntimeConfig` is false, `meteor-imports` will not set `window._
 need to include any of the relevant variables like `ROOT_URL` in the options.  Use this option if you would like to
 inject `__meteor_runtime_config__` in your own SSR.
 
+#### config.legacy
+
+If truthy, use the `web.browser.legacy` build folder instead of the `web.browser`
+folder.
+
 #### config.meteorFolder
 
 The subfolder where your Meteor project is located. It can be an absolute path as well.
