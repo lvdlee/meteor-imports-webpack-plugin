@@ -1,3 +1,5 @@
+Fork of the original plugin found [here](https://github.com/jedwards1211/meteor-imports-webpack-plugin).
+
 # Meteor Imports Webpack Plugin
 
 This plugin lets you import any Meteor package like if it was a real NPM package. It is useful when you want to use some of the Meteor tools (or even a Meteor server) but you prefer to use Webpack for the client build instead of the Meteor build system.
