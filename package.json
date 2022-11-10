@@ -24,14 +24,20 @@
   },
   "homepage": "https://github.com/lvdlee/meteor-imports-webpack-plugin#readme",
   "peerDependencies": {
-    "webpack": "^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0"
+    "webpack": "^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0",
+    "css-loader": ">=0.28.0",
+    "style-loader": ">=0.16.1"
   },
   "dependencies": {
-    "css-loader": "^6.7.1",
-    "enhanced-resolve": "^2.3.0",
+    "colors": "^1.2.1",
+    "enhanced-resolve": "^4.0.0",
     "exports-loader": "^0.6.3",
     "imports-loader": "^0.6.5",
     "json-string-loader": "^1.1.0",
-    "style-loader": "^0.16.1"
+    "lodash": "~4.17.5",
+    "md5": "^2.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1"
   }
 }

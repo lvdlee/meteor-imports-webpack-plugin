@@ -6,7 +6,11 @@ if (webpack.version && webpack.version[0] > 4) {
   MeteorImportsPlugin = require("./webpack5");
 } else {
   // webpack4 and lower
-  MeteorImportsPlugin = require("./webpack4");
+  if (webpack.version && webpack.version[0] > 3) {
+    MeteorImportsPlugin = require("./webpack4");
+  } else {
+    MeteorImportsPlugin = require("./webpack3");
+  }
 }
 
 module.exports = MeteorImportsPlugin;
