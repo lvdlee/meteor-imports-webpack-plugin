@@ -2,7 +2,6 @@ const fs = require("fs");
 const _ = require("lodash");
 const md5 = require("md5");
 const path = require("path");
-const RuleSet = require("webpack/lib/RuleSet");
 const AliasPlugin = require("enhanced-resolve/lib/AliasPlugin");
 const { log, logWarn, logError } = require("./utils");
 const MeteorPackageModule = require("./MeteorPackageModule");
@@ -59,7 +58,7 @@ class MeteorImportsPlugin {
       const nmf = params.normalModuleFactory;
 
       // Add special loaders for modules/global-imports/packages to load them in the right way
-      this.addLoaders(nmf);
+      this.addLoaders(compiler);
 
       // Add bridge modules from webpack's module system to meteor's for all dependencies starting with "meteor/"
       this.setupPackageBridgeModules(nmf);
@@ -196,7 +195,7 @@ class MeteorImportsPlugin {
     ).apply(resolver);
   }
 
-  addLoaders(nmf) {
+  addLoaders(compiler) {
     const extraRules = [
       {
         meteorImports: true,
@@ -244,7 +243,8 @@ class MeteorImportsPlugin {
         use: [{ loader: "style-loader" }, { loader: "css-loader" }],
       },
     ];
-    nmf.ruleSet = new RuleSet(nmf.ruleSet.rules.concat(extraRules));
+
+    compiler.options.module.rules = [compiler.options.module.rules, extraRules];
   }
 
   setupPackageBridgeModules(nmf) {
