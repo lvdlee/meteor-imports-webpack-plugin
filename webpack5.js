@@ -250,7 +250,7 @@ class MeteorImportsPlugin {
   setupPackageBridgeModules(nmf) {
     // We must (?) hook directly on normalModuleFactory.hooks.resolver in order to return a direct module,
     // which in turn is one of few ways to direct a request to a code string without access the file system
-    const resolverHook = nmf.hooks.resolver;
+    const resolverHook = nmf.hooks.resolve;
     let prevResolver = resolverHook.call(null);
     resolverHook.tap(PLUGIN_NAME, () => (data, callback) => {
       const request = data.request;
