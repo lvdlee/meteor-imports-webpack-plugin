@@ -6,6 +6,44 @@ const AliasPlugin = require("enhanced-resolve/lib/AliasPlugin");
 const { log, logWarn, logError } = require("./utils");
 const MeteorPackageModule = require("./MeteorPackageModule");
 const MeteorPackageBridgeModule = require("./MeteorPackageBridgeModule");
+const BasicEffectRulePlugin = require("webpack/lib/rules/BasicEffectRulePlugin");
+const BasicMatcherRulePlugin = require("webpack/lib/rules/BasicMatcherRulePlugin");
+const RuleSetCompiler = require("webpack/lib/rules/RuleSetCompiler");
+const UseEffectRulePlugin = require("webpack/lib/rules/UseEffectRulePlugin");
+
+const objectMatcherRulePlugins = [];
+try {
+  const ObjectMatcherRulePlugin = require("webpack/lib/rules/ObjectMatcherRulePlugin");
+  objectMatcherRulePlugins.push(
+    new ObjectMatcherRulePlugin("assert", "assertions"),
+    new ObjectMatcherRulePlugin("descriptionData")
+  );
+} catch (e) {
+  const DescriptionDataMatcherRulePlugin = require("webpack/lib/rules/DescriptionDataMatcherRulePlugin");
+  objectMatcherRulePlugins.push(new DescriptionDataMatcherRulePlugin());
+}
+
+const ruleSetCompiler = new RuleSetCompiler([
+  new BasicMatcherRulePlugin("test", "resource"),
+  new BasicMatcherRulePlugin("mimetype"),
+  new BasicMatcherRulePlugin("dependency"),
+  new BasicMatcherRulePlugin("include", "resource"),
+  new BasicMatcherRulePlugin("exclude", "resource", true),
+  new BasicMatcherRulePlugin("conditions"),
+  new BasicMatcherRulePlugin("resource"),
+  new BasicMatcherRulePlugin("resourceQuery"),
+  new BasicMatcherRulePlugin("resourceFragment"),
+  new BasicMatcherRulePlugin("realResource"),
+  new BasicMatcherRulePlugin("issuer"),
+  new BasicMatcherRulePlugin("compiler"),
+  ...objectMatcherRulePlugins,
+  new BasicEffectRulePlugin("type"),
+  new BasicEffectRulePlugin("sideEffects"),
+  new BasicEffectRulePlugin("parser"),
+  new BasicEffectRulePlugin("resolve"),
+  new BasicEffectRulePlugin("generator"),
+  new UseEffectRulePlugin(),
+]);
 
 function escapeForRegEx(str) {
   return str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
@@ -53,15 +91,13 @@ class MeteorImportsPlugin {
   apply(compiler) {
     this.initConfig(compiler);
     this.setPaths(compiler);
+    this.addLoaders(compiler);
 
     compiler.hooks.compile.tap(PLUGIN_NAME, (params) => {
       const nmf = params.normalModuleFactory;
 
-      // Add special loaders for modules/global-imports/packages to load them in the right way
-      this.addLoaders(compiler);
-
       // Add bridge modules from webpack's module system to meteor's for all dependencies starting with "meteor/"
-      this.setupPackageBridgeModules(nmf);
+      params.normalModuleFactory = this.setupPackageBridgeModules(nmf);
 
       // We don't want webpack's parsing of meteor packages (except modules) since they're using Meteor's package system
       nmf.hooks.createModule.tap(PLUGIN_NAME, (result) => {
@@ -198,7 +234,6 @@ class MeteorImportsPlugin {
   addLoaders(compiler) {
     const extraRules = [
       {
-        meteorImports: true,
         test: /meteor-imports\.js$/,
         loader: path.join(__dirname, "meteor-imports.js"),
         options: {
@@ -208,7 +243,6 @@ class MeteorImportsPlugin {
         },
       },
       {
-        meteorImports: true,
         test: /meteor-config\.js$/,
         loader: path.join(__dirname, "meteor-config.js"),
         options: {
@@ -216,7 +250,6 @@ class MeteorImportsPlugin {
         },
       },
       {
-        meteorImports: true,
         test: PACKAGES_REGEX_NOT_MODULES,
         use: [
           {
@@ -226,39 +259,33 @@ class MeteorImportsPlugin {
         ],
       },
       {
-        meteorImports: true,
         test: PACKAGES_REGEX_MODULES,
         loader: path.join(__dirname, "modules-loader.js"),
       },
       {
-        meteorImports: true,
         test: PACKAGES_REGEX_GLOBAL_IMPORTS,
         loader: path.join(__dirname, "global-imports-loader.js"),
         options: this.config,
       },
       {
-        meteorImports: true,
         test: /\.css$/,
         include: [this.meteorPackages],
         use: [{ loader: "style-loader" }, { loader: "css-loader" }],
       },
     ];
 
-    compiler.options.module.rules = [compiler.options.module.rules, extraRules];
+    compiler.options.module.rules =
+      compiler.options.module.rules.concat(extraRules);
   }
 
   setupPackageBridgeModules(nmf) {
     // We must (?) hook directly on normalModuleFactory.hooks.resolver in order to return a direct module,
     // which in turn is one of few ways to direct a request to a code string without access the file system
-    const resolverHook = nmf.hooks.resolve;
-    let prevResolver = resolverHook.call(null);
-    resolverHook.tap(PLUGIN_NAME, () => (data, callback) => {
+    nmf.hooks.resolve.tap(PLUGIN_NAME, (data, callback) => {
       const request = data.request;
 
       if (request.startsWith("meteor/"))
         return callback(null, new MeteorPackageBridgeModule(request, nmf));
-
-      prevResolver.call(this, data, callback);
     });
     return nmf;
   }
