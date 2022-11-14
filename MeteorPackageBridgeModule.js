@@ -5,6 +5,7 @@ module.exports = class MeteorPackageBridgeModule extends NormalModule {
     const type = "javascript/dynamic";
     const parser = nmf.getParser(type);
     const generator = nmf.getGenerator(type);
+
     super({
       type: type,
       request,
@@ -12,6 +13,7 @@ module.exports = class MeteorPackageBridgeModule extends NormalModule {
       userRequest: request,
       parser,
       generator,
+      loaders: [],
     });
   }
 
@@ -23,6 +25,19 @@ module.exports = class MeteorPackageBridgeModule extends NormalModule {
       /* fileSystem (only readFile required): */ this,
       callback
     );
+  }
+
+  /**
+   * @param {Hash} hash the hash used to track dependencies
+   * @param {UpdateHashContext} context context
+   * @returns {void}
+   */
+  updateHash(hash, context) {
+    hash.update("meteor");
+    this.generator.updateHash(hash, {
+      module: this,
+      ...context,
+    });
   }
 
   readFile(path, cb) {

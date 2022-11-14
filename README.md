@@ -37,17 +37,21 @@ Install the plugin
 ```bash
 cd ..
 npm install meteor-imports-webpack-plugin --save-dev
+npm install node-polyfill-webpack-plugin --save-dev
 ```
 
 Include it in your `webpack.config.js` file
 
 ```javascript
-var MeteorImportsPlugin = require('meteor-imports-webpack-plugin');
+const MeteorImportsPlugin = require('meteor-imports-webpack-plugin');
+// Polyfills for Webpack 5+ only
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
     ...
     plugins: [
-      new MeteorImportsPlugin(config)
+      new MeteorImportsPlugin(config),
+      new NodePolyfillPlugin()
     ]
 };
 ```

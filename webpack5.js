@@ -102,8 +102,9 @@ class MeteorImportsPlugin {
       // We don't want webpack's parsing of meteor packages (except modules) since they're using Meteor's package system
       nmf.hooks.createModule.tap(PLUGIN_NAME, (result) => {
         // TODO: Investigate if we can split this to e.g. startWith(meteorBuild) and match packages
-        if (result.userRequest.match(PACKAGES_REGEX_NOT_MODULES))
+        if (result.userRequest.match(PACKAGES_REGEX_NOT_MODULES)) {
           return new MeteorPackageModule(result);
+        }
       });
     });
 
@@ -281,11 +282,15 @@ class MeteorImportsPlugin {
   setupPackageBridgeModules(nmf) {
     // We must (?) hook directly on normalModuleFactory.hooks.resolver in order to return a direct module,
     // which in turn is one of few ways to direct a request to a code string without access the file system
-    nmf.hooks.resolve.tap(PLUGIN_NAME, (data, callback) => {
+    nmf.hooks.resolve.tapAsync(PLUGIN_NAME, (data, callback) => {
       const request = data.request;
 
-      if (request.startsWith("meteor/"))
+      if (request.startsWith("meteor/")) {
+        // console.log(nmf);
         return callback(null, new MeteorPackageBridgeModule(request, nmf));
+      }
+
+      callback();
     });
     return nmf;
   }
