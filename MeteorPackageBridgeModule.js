@@ -13,7 +13,7 @@ module.exports = class MeteorPackageBridgeModule extends NormalModule {
       userRequest: request,
       parser,
       generator,
-      loaders: [],
+      // loaders: [],
     });
   }
 
@@ -27,18 +27,18 @@ module.exports = class MeteorPackageBridgeModule extends NormalModule {
     );
   }
 
-  /**
-   * @param {Hash} hash the hash used to track dependencies
-   * @param {UpdateHashContext} context context
-   * @returns {void}
-   */
-  updateHash(hash, context) {
-    hash.update("meteor");
-    this.generator.updateHash(hash, {
-      module: this,
-      ...context,
-    });
-  }
+  // /**
+  //  * @param {Hash} hash the hash used to track dependencies
+  //  * @param {UpdateHashContext} context context
+  //  * @returns {void}
+  //  */
+  // updateHash(hash, context) {
+  //   hash.update("meteor");
+  //   this.generator.updateHash(hash, {
+  //     module: this,
+  //     ...context,
+  //   });
+  // }
 
   readFile(path, cb) {
     return cb(null, `module.exports = require("meteor-imports")("${path}");`);
